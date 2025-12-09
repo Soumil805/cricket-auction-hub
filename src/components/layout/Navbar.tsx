@@ -1,8 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Trophy, User } from "lucide-react";
+import { Menu, X, Trophy } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { UserMenu } from "./UserMenu";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -13,6 +15,7 @@ const navLinks = [
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { user } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -45,13 +48,7 @@ export function Navbar() {
 
         {/* Desktop Actions */}
         <div className="hidden md:flex items-center gap-3">
-          <Button variant="ghost" size="sm">
-            <User className="h-4 w-4 mr-2" />
-            Login
-          </Button>
-          <Button size="sm">
-            Register
-          </Button>
+          <UserMenu />
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -84,12 +81,20 @@ export function Navbar() {
               </Link>
             ))}
             <div className="flex gap-3 pt-4 border-t border-border">
-              <Button variant="ghost" size="sm" className="flex-1">
-                Login
-              </Button>
-              <Button size="sm" className="flex-1">
-                Register
-              </Button>
+              {user ? (
+                <div className="w-full">
+                  <UserMenu />
+                </div>
+              ) : (
+                <>
+                  <Button variant="ghost" size="sm" className="flex-1" asChild>
+                    <Link to="/auth" onClick={() => setIsOpen(false)}>Login</Link>
+                  </Button>
+                  <Button size="sm" className="flex-1" asChild>
+                    <Link to="/auth" onClick={() => setIsOpen(false)}>Register</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </nav>
         </div>
