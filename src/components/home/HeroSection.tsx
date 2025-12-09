@@ -50,9 +50,9 @@ export function HeroSection() {
               variant="outline" 
               className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
             >
-              <Link to="/register">
+              <Link to="/auth">
                 <Users className="h-5 w-5 mr-2" />
-                Register as Player
+                Get Started
               </Link>
             </Button>
           </div>

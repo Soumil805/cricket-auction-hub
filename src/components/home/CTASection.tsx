@@ -26,7 +26,7 @@ export function CTASection() {
               Set up your cricket tournament with customizable settings, teams, and auction rules.
             </p>
             <Button asChild className="w-full">
-              <Link to="/create-tournament">Get Started</Link>
+              <Link to="/tournaments/new">Get Started</Link>
             </Button>
           </div>
 
