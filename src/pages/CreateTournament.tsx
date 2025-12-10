@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ChevronLeft, ChevronRight, Check, Trophy } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, Trophy, Loader2 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
@@ -14,6 +14,8 @@ import { TeamSettingsStep } from "@/components/tournaments/create/TeamSettingsSt
 import { VenueStep } from "@/components/tournaments/create/VenueStep";
 import { PaymentStep } from "@/components/tournaments/create/PaymentStep";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const tournamentFormSchema = z.object({
   // Basic Info
@@ -72,7 +74,9 @@ const stepFields: Record<number, (keyof TournamentFormData)[]> = {
 
 export default function CreateTournament() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const { user, isOrganizer } = useAuth();
 
   const form = useForm<TournamentFormData>({
     resolver: zodResolver(tournamentFormSchema),
@@ -120,13 +124,76 @@ export default function CreateTournament() {
     setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
-  const onSubmit = (data: TournamentFormData) => {
-    console.log("Tournament data:", data);
-    toast({
-      title: "Tournament Created!",
-      description: `${data.name} has been created successfully. Database integration coming soon!`,
-    });
-    navigate("/tournaments");
+  const onSubmit = async (data: TournamentFormData) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to create a tournament.",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    if (!isOrganizer) {
+      toast({
+        title: "Organizer Role Required",
+        description: "You need to be an organizer to create tournaments.",
+        variant: "destructive",
+      });
+      navigate("/become-organizer");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase.from("tournaments").insert({
+        organizer_id: user.id,
+        name: data.name,
+        slogan: data.slogan || null,
+        description: data.description || null,
+        start_date: data.startDate.toISOString().split("T")[0],
+        end_date: data.endDate.toISOString().split("T")[0],
+        logo_url: data.logoUrl || null,
+        category: data.category,
+        ball_type: data.ballType,
+        pitch_type: data.pitchType,
+        match_type: data.matchType,
+        overs: data.overs,
+        number_of_teams: data.numberOfTeams,
+        players_per_team: data.playersPerTeam,
+        team_budget: data.teamBudget,
+        base_price: data.basePrice,
+        captain_voting_enabled: data.captainVotingEnabled,
+        max_votes_per_player: data.captainVotingEnabled ? data.maxVotesPerPlayer : null,
+        venue_name: data.venueName,
+        venue_state: data.venueState,
+        venue_city: data.venueCity,
+        venue_address: data.venueAddress || null,
+        venue_pincode: data.venuePincode || null,
+        entry_fee: data.entryFee,
+        payment_instructions: data.paymentInstructions || null,
+        payment_qr_url: data.paymentQrUrl || null,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Tournament Created!",
+        description: `${data.name} has been created successfully.`,
+      });
+      navigate("/tournaments");
+    } catch (error: any) {
+      console.error("Error creating tournament:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create tournament. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderStep = () => {
@@ -188,9 +255,17 @@ export default function CreateTournament() {
                       <ChevronRight className="h-4 w-4 ml-2" />
                     </Button>
                   ) : (
-                    <Button type="submit" className="bg-cricket-green hover:bg-cricket-green/90">
-                      <Check className="h-4 w-4 mr-2" />
-                      Create Tournament
+                    <Button 
+                      type="submit" 
+                      className="bg-cricket-green hover:bg-cricket-green/90"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Check className="h-4 w-4 mr-2" />
+                      )}
+                      {isSubmitting ? "Creating..." : "Create Tournament"}
                     </Button>
                   )}
                 </div>
