@@ -14,7 +14,8 @@ import {
   Target,
   Clock,
   Gavel,
-  UserPlus
+  UserPlus,
+  Pencil
 } from "lucide-react";
 import { 
   mockTournaments, 
@@ -26,10 +27,15 @@ import {
   getStatusColor 
 } from "@/data/mockData";
 import { format } from "date-fns";
+import { useAuth } from "@/contexts/AuthContext";
 
 const TournamentDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
   const tournament = mockTournaments.find((t) => t.id === id);
+
+  // Check if current user is the organizer (for mock data, we'll use a simple check)
+  const isOwner = user && tournament?.organizer_id === user.id;
 
   if (!tournament) {
     return (
@@ -57,14 +63,24 @@ const TournamentDetail = () => {
       <section className="relative bg-gradient-primary text-primary-foreground py-12 md:py-20">
         <div className="absolute inset-0 cricket-pattern opacity-20" />
         <div className="container relative">
-          {/* Back Button */}
-          <Link 
-            to="/tournaments" 
-            className="inline-flex items-center text-sm text-primary-foreground/80 hover:text-primary-foreground mb-6 transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Tournaments
-          </Link>
+          {/* Back Button and Edit */}
+          <div className="flex items-center justify-between mb-6">
+            <Link 
+              to="/tournaments" 
+              className="inline-flex items-center text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Tournaments
+            </Link>
+            {isOwner && (
+              <Button asChild variant="secondary" size="sm">
+                <Link to={`/tournaments/${id}/edit`}>
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Edit Tournament
+                </Link>
+              </Button>
+            )}
+          </div>
 
           <div className="flex flex-col md:flex-row gap-6 items-start">
             {/* Logo */}
