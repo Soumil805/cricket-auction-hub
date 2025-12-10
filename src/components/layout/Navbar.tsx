@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Trophy } from "lucide-react";
+import { Menu, X, Trophy, Gavel } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { UserMenu } from "./UserMenu";
@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/tournaments", label: "Tournaments" },
+  { href: "/auctions", label: "Live Auctions", icon: Gavel },
   { href: "/about", label: "About" },
 ];
 
