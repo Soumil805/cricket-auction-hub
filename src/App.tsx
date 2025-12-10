@@ -11,14 +11,16 @@ import CreateTournament from "./pages/CreateTournament";
 import Auth from "./pages/Auth";
 import Register from "./pages/Register";
 import BecomeOrganizer from "./pages/BecomeOrganizer";
+import LiveAuctions from "./pages/LiveAuctions";
+import LiveAuction from "./pages/LiveAuction";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
+    <TooltipProvider>
+      <AuthProvider>
         <Toaster />
         <Sonner />
         <BrowserRouter>
@@ -30,12 +32,13 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/register" element={<Register />} />
             <Route path="/become-organizer" element={<BecomeOrganizer />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/auctions" element={<LiveAuctions />} />
+            <Route path="/auctions/:id" element={<LiveAuction />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </TooltipProvider>
   </QueryClientProvider>
 );
 
