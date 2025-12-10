@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Users, Trophy, Circle } from "lucide-react";
+import { Calendar, MapPin, Users, Trophy, Circle, Pencil } from "lucide-react";
 import { 
   Tournament, 
   getCategoryLabel, 
@@ -11,13 +11,16 @@ import {
   getStatusColor 
 } from "@/data/mockData";
 import { format } from "date-fns";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface TournamentCardProps {
   tournament: Tournament;
 }
 
 export function TournamentCard({ tournament }: TournamentCardProps) {
+  const { user } = useAuth();
   const isLive = tournament.status === 'live' || tournament.status === 'auction';
+  const isOwner = user && tournament.organizer_id === user.id;
 
   return (
     <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
@@ -90,12 +93,19 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
         </div>
       </CardContent>
 
-      <CardFooter className="p-4 pt-0">
-        <Button asChild className="w-full">
+      <CardFooter className="p-4 pt-0 gap-2">
+        <Button asChild className="flex-1">
           <Link to={`/tournaments/${tournament.id}`}>
             View Details
           </Link>
         </Button>
+        {isOwner && (
+          <Button asChild variant="outline" size="icon">
+            <Link to={`/tournaments/${tournament.id}/edit`}>
+              <Pencil className="h-4 w-4" />
+            </Link>
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

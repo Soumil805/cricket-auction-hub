@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Tournaments from "./pages/Tournaments";
 import TournamentDetail from "./pages/TournamentDetail";
 import CreateTournament from "./pages/CreateTournament";
+import EditTournament from "./pages/EditTournament";
 import Auth from "./pages/Auth";
 import Register from "./pages/Register";
 import BecomeOrganizer from "./pages/BecomeOrganizer";
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/tournaments" element={<Tournaments />} />
             <Route path="/tournaments/:id" element={<TournamentDetail />} />
+            <Route path="/tournaments/:id/edit" element={<EditTournament />} />
             <Route path="/tournaments/new" element={<CreateTournament />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/register" element={<Register />} />
