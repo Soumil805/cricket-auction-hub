@@ -1,29 +1,66 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { TournamentCard } from "@/components/tournaments/TournamentCard";
 import { TournamentFilters } from "@/components/tournaments/TournamentFilters";
-import { mockTournaments, TournamentCategory, BallType, TournamentStatus } from "@/data/mockData";
-import { Trophy } from "lucide-react";
+import { TournamentCategory, BallType, TournamentStatus } from "@/data/mockData";
+import { Trophy, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+interface TournamentData {
+  id: string;
+  name: string;
+  slogan: string | null;
+  logo_url: string | null;
+  category: string;
+  ball_type: string;
+  overs: number;
+  start_date: string;
+  end_date: string;
+  venue_city: string | null;
+  venue_state: string | null;
+  number_of_teams: number;
+  players_per_team: number;
+  status: string;
+  organizer_id: string;
+}
 
 const Tournaments = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<TournamentCategory | null>(null);
   const [selectedBallType, setSelectedBallType] = useState<BallType | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<TournamentStatus | null>(null);
+  const [tournaments, setTournaments] = useState<TournamentData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchTournaments = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("tournaments")
+      .select("*")
+      .neq("status", "draft")
+      .order("start_date", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching tournaments:", error);
+    } else {
+      setTournaments(data || []);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchTournaments();
+  }, []);
 
   const filteredTournaments = useMemo(() => {
-    return mockTournaments.filter((tournament) => {
-      // Exclude drafts
-      if (tournament.status === 'draft') return false;
-
+    return tournaments.filter((tournament) => {
       // Search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const matchesSearch =
           tournament.name.toLowerCase().includes(query) ||
           tournament.slogan?.toLowerCase().includes(query) ||
-          tournament.ground.city.toLowerCase().includes(query) ||
-          tournament.organizer_name.toLowerCase().includes(query);
+          tournament.venue_city?.toLowerCase().includes(query);
         if (!matchesSearch) return false;
       }
 
@@ -38,7 +75,38 @@ const Tournaments = () => {
 
       return true;
     });
-  }, [searchQuery, selectedCategory, selectedBallType, selectedStatus]);
+  }, [tournaments, searchQuery, selectedCategory, selectedBallType, selectedStatus]);
+
+  // Transform database format to TournamentCard expected format
+  const transformedTournaments = filteredTournaments.map((t) => ({
+    id: t.id,
+    name: t.name,
+    slogan: t.slogan,
+    logo_url: t.logo_url,
+    category: t.category as TournamentCategory,
+    ball_type: t.ball_type as BallType,
+    pitch_type: "turf" as const,
+    match_type: "limited-overs" as const,
+    overs: t.overs,
+    start_date: t.start_date,
+    end_date: t.end_date,
+    status: t.status as TournamentStatus,
+    total_teams: t.number_of_teams,
+    players_per_team: t.players_per_team,
+    max_player_bids: 3,
+    is_public: true,
+    organizer_id: t.organizer_id,
+    organizer_name: "Organizer",
+    ground: {
+      id: "1",
+      name: "Venue",
+      country: "India",
+      city: t.venue_city || "Unknown",
+      state: t.venue_state || "Unknown",
+      address: "",
+      pincode: "",
+    },
+  }));
 
   return (
     <Layout>
@@ -82,19 +150,23 @@ const Tournaments = () => {
               {/* Results Count */}
               <div className="mb-6">
                 <p className="text-muted-foreground">
-                  Showing <span className="font-medium text-foreground">{filteredTournaments.length}</span> tournaments
+                  Showing <span className="font-medium text-foreground">{transformedTournaments.length}</span> tournaments
                 </p>
               </div>
 
-              {filteredTournaments.length > 0 ? (
+              {loading ? (
+                <div className="flex items-center justify-center py-16">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : transformedTournaments.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {filteredTournaments.map((tournament, index) => (
+                  {transformedTournaments.map((tournament, index) => (
                     <div
                       key={tournament.id}
                       className="animate-slide-up"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      <TournamentCard tournament={tournament} />
+                      <TournamentCard tournament={tournament} onDelete={fetchTournaments} />
                     </div>
                   ))}
                 </div>
