@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -76,7 +76,19 @@ export default function CreateTournament() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
-  const { user, isOrganizer } = useAuth();
+  const { user, isOrganizer, loading } = useAuth();
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!loading && !user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to create a tournament.",
+        variant: "destructive",
+      });
+      navigate("/auth");
+    }
+  }, [user, loading, navigate]);
 
   const form = useForm<TournamentFormData>({
     resolver: zodResolver(tournamentFormSchema),
