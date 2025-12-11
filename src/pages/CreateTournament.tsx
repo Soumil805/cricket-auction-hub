@@ -225,6 +225,17 @@ export default function CreateTournament() {
     }
   };
 
+  // Show loading while checking auth
+  if (loading) {
+    return (
+      <Layout>
+        <div className="container mx-auto py-8 px-4 flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="container mx-auto py-8 px-4">
