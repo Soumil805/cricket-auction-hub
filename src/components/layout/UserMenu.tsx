@@ -10,10 +10,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { User, LogOut, Trophy, UserPlus, Shield } from "lucide-react";
+import { User, LogOut, Trophy, UserPlus, Shield, Gavel, MapPin } from "lucide-react";
 
 export function UserMenu() {
-  const { user, isPlayer, isOrganizer, signOut } = useAuth();
+  const { user, isPlayer, isOrganizer, isUmpire, isGroundOwner, signOut } = useAuth();
 
   if (!user) {
     return (
@@ -48,7 +48,7 @@ export function UserMenu() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{user.email}</p>
-            <div className="flex gap-1 mt-1">
+            <div className="flex flex-wrap gap-1 mt-1">
               {isPlayer && (
                 <span className="text-xs px-1.5 py-0.5 rounded bg-primary/10 text-primary">
                   Player
@@ -57,6 +57,16 @@ export function UserMenu() {
               {isOrganizer && (
                 <span className="text-xs px-1.5 py-0.5 rounded bg-accent/20 text-accent">
                   Organizer
+                </span>
+              )}
+              {isUmpire && (
+                <span className="text-xs px-1.5 py-0.5 rounded bg-success/20 text-success">
+                  Umpire
+                </span>
+              )}
+              {isGroundOwner && (
+                <span className="text-xs px-1.5 py-0.5 rounded bg-secondary/50 text-secondary-foreground">
+                  Ground Owner
                 </span>
               )}
             </div>
@@ -78,6 +88,24 @@ export function UserMenu() {
             <Link to="/become-organizer" className="cursor-pointer">
               <Shield className="mr-2 h-4 w-4" />
               Become an Organizer
+            </Link>
+          </DropdownMenuItem>
+        )}
+
+        {!isUmpire && (
+          <DropdownMenuItem asChild>
+            <Link to="/register-umpire" className="cursor-pointer">
+              <Gavel className="mr-2 h-4 w-4" />
+              Register as Umpire
+            </Link>
+          </DropdownMenuItem>
+        )}
+
+        {!isGroundOwner && (
+          <DropdownMenuItem asChild>
+            <Link to="/register-ground-owner" className="cursor-pointer">
+              <MapPin className="mr-2 h-4 w-4" />
+              Register as Ground Owner
             </Link>
           </DropdownMenuItem>
         )}
