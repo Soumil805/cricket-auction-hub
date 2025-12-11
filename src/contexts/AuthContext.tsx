@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-type AppRole = "player" | "organizer" | "admin";
+type AppRole = "player" | "organizer" | "admin" | "umpire" | "ground_owner";
 
 interface AuthContextType {
   user: User | null;
@@ -11,6 +11,8 @@ interface AuthContextType {
   roles: AppRole[];
   isPlayer: boolean;
   isOrganizer: boolean;
+  isUmpire: boolean;
+  isGroundOwner: boolean;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -128,6 +130,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     roles,
     isPlayer: roles.includes("player"),
     isOrganizer: roles.includes("organizer"),
+    isUmpire: roles.includes("umpire"),
+    isGroundOwner: roles.includes("ground_owner"),
     signUp,
     signIn,
     signOut,

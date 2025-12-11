@@ -11,6 +11,8 @@ import CreateTournament from "./pages/CreateTournament";
 import EditTournament from "./pages/EditTournament";
 import Auth from "./pages/Auth";
 import Register from "./pages/Register";
+import RegisterUmpire from "./pages/RegisterUmpire";
+import RegisterGroundOwner from "./pages/RegisterGroundOwner";
 import BecomeOrganizer from "./pages/BecomeOrganizer";
 import LiveAuctions from "./pages/LiveAuctions";
 import LiveAuction from "./pages/LiveAuction";
@@ -33,6 +35,8 @@ const App = () => (
             <Route path="/tournaments/new" element={<CreateTournament />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/register-umpire" element={<RegisterUmpire />} />
+            <Route path="/register-ground-owner" element={<RegisterGroundOwner />} />
             <Route path="/become-organizer" element={<BecomeOrganizer />} />
             <Route path="/auctions" element={<LiveAuctions />} />
             <Route path="/auctions/:id" element={<LiveAuction />} />
