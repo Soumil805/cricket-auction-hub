@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,27 +16,82 @@ import {
   Clock,
   Gavel,
   UserPlus,
-  Pencil
+  Pencil,
+  Loader2
 } from "lucide-react";
 import { 
-  mockTournaments, 
   getCategoryLabel, 
   getBallTypeLabel, 
   getPitchTypeLabel,
   getMatchTypeLabel,
   getStatusLabel, 
-  getStatusColor 
+  getStatusColor,
+  isLiveStatus,
+  canApplyToTournament,
+  isAuctionStatus
 } from "@/data/mockData";
 import { format } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
+
+type Tournament = Tables<"tournaments">;
 
 const TournamentDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
-  const tournament = mockTournaments.find((t) => t.id === id);
+  const [tournament, setTournament] = useState<Tournament | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [teamsCount, setTeamsCount] = useState(0);
+  const [playersCount, setPlayersCount] = useState(0);
 
-  // Check if current user is the organizer (for mock data, we'll use a simple check)
+  useEffect(() => {
+    const fetchTournament = async () => {
+      if (!id) return;
+      
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("tournaments")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+      
+      if (!error && data) {
+        setTournament(data);
+        
+        // Fetch teams count
+        const { count: tCount } = await supabase
+          .from("teams")
+          .select("*", { count: "exact", head: true })
+          .eq("tournament_id", id);
+        setTeamsCount(tCount || 0);
+        
+        // Fetch approved players count
+        const { count: pCount } = await supabase
+          .from("tournament_applications")
+          .select("*", { count: "exact", head: true })
+          .eq("tournament_id", id)
+          .eq("status", "approved");
+        setPlayersCount(pCount || 0);
+      }
+      
+      setLoading(false);
+    };
+    
+    fetchTournament();
+  }, [id]);
+
   const isOwner = user && tournament?.organizer_id === user.id;
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="container py-16 flex justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </Layout>
+    );
+  }
 
   if (!tournament) {
     return (
@@ -53,9 +109,9 @@ const TournamentDetail = () => {
     );
   }
 
-  const isLive = tournament.status === 'live' || tournament.status === 'auction';
-  const canApply = tournament.status === 'registration';
-  const isAuction = tournament.status === 'auction';
+  const isLive = isLiveStatus(tournament.status);
+  const canApply = canApplyToTournament(tournament.status);
+  const isAuction = isAuctionStatus(tournament.status);
 
   return (
     <Layout>
@@ -125,12 +181,9 @@ const TournamentDetail = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
-                  <span>{tournament.ground.city}, {tournament.ground.state}</span>
+                  <span>{tournament.venue_city}, {tournament.venue_state}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Trophy className="h-4 w-4" />
-                  <span>Organized by {tournament.organizer_name}</span>
-                </div>
+                {/* Organizer info can be added once profiles are linked */}
               </div>
             </div>
           </div>
@@ -158,7 +211,7 @@ const TournamentDetail = () => {
                       <p className="text-sm text-muted-foreground">Overs</p>
                     </div>
                     <div className="text-center p-4 rounded-lg bg-muted/50">
-                      <p className="text-2xl font-bold text-foreground">{tournament.total_teams}</p>
+                      <p className="text-2xl font-bold text-foreground">{tournament.number_of_teams}</p>
                       <p className="text-sm text-muted-foreground">Teams</p>
                     </div>
                     <div className="text-center p-4 rounded-lg bg-muted/50">
@@ -166,8 +219,8 @@ const TournamentDetail = () => {
                       <p className="text-sm text-muted-foreground">Players/Team</p>
                     </div>
                     <div className="text-center p-4 rounded-lg bg-muted/50">
-                      <p className="text-2xl font-bold text-foreground">{tournament.max_player_bids}</p>
-                      <p className="text-sm text-muted-foreground">Max Bids</p>
+                      <p className="text-2xl font-bold text-foreground">₹{tournament.team_budget?.toLocaleString('en-IN')}</p>
+                      <p className="text-sm text-muted-foreground">Team Budget</p>
                     </div>
                   </div>
 
@@ -206,28 +259,28 @@ const TournamentDetail = () => {
                       <MapPin className="h-8 w-8 text-muted-foreground" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-foreground">{tournament.ground.name}</h3>
-                      <p className="text-muted-foreground">{tournament.ground.address}</p>
+                      <h3 className="font-semibold text-foreground">{tournament.venue_name || "Venue TBD"}</h3>
+                      <p className="text-muted-foreground">{tournament.venue_address}</p>
                       <p className="text-muted-foreground">
-                        {tournament.ground.city}, {tournament.ground.state} - {tournament.ground.pincode}
+                        {tournament.venue_city}, {tournament.venue_state} {tournament.venue_pincode && `- ${tournament.venue_pincode}`}
                       </p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Teams Preview (Mock) */}
-              {tournament.teams_count && tournament.teams_count > 0 && (
+              {/* Teams Preview */}
+              {teamsCount > 0 && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Users className="h-5 w-5 text-primary" />
-                      Teams ({tournament.teams_count}/{tournament.total_teams})
+                      Teams ({teamsCount}/{tournament.number_of_teams})
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {Array.from({ length: Math.min(tournament.teams_count, 4) }).map((_, i) => (
+                      {Array.from({ length: Math.min(teamsCount, 4) }).map((_, i) => (
                         <div key={i} className="text-center p-4 rounded-lg border border-border">
                           <div className="h-12 w-12 rounded-full bg-muted mx-auto mb-2 flex items-center justify-center">
                             <Trophy className="h-6 w-6 text-muted-foreground" />
@@ -236,9 +289,9 @@ const TournamentDetail = () => {
                         </div>
                       ))}
                     </div>
-                    {tournament.teams_count > 4 && (
+                    {teamsCount > 4 && (
                       <p className="text-center text-sm text-muted-foreground mt-4">
-                        +{tournament.teams_count - 4} more teams
+                        +{teamsCount - 4} more teams
                       </p>
                     )}
                   </CardContent>
@@ -277,7 +330,7 @@ const TournamentDetail = () => {
                     </Button>
                   )}
 
-                  {tournament.status === 'live' && (
+                  {tournament.status === 'in_progress' && (
                     <Button variant="outline" className="w-full" size="lg">
                       View Matches
                     </Button>
@@ -286,16 +339,16 @@ const TournamentDetail = () => {
                   <div className="pt-4 border-t border-border space-y-3 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Registered Players</span>
-                      <span className="font-medium">{tournament.players_count || 0}</span>
+                      <span className="font-medium">{playersCount}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Teams Formed</span>
-                      <span className="font-medium">{tournament.teams_count || 0}</span>
+                      <span className="font-medium">{teamsCount}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Spots Left</span>
                       <span className="font-medium text-success">
-                        {(tournament.total_teams * tournament.players_per_team) - (tournament.players_count || 0)}
+                        {(tournament.number_of_teams * tournament.players_per_team) - playersCount}
                       </span>
                     </div>
                   </div>
