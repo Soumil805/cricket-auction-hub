@@ -6,6 +6,18 @@ export type PitchType = 'turf' | 'cement' | 'matting' | 'synthetic' | 'grass';
 export type MatchType = 'limited-overs' | 't20' | 't10' | 'test';
 export type TournamentStatus = 'draft' | 'registration' | 'auction' | 'live' | 'completed';
 
+// Database status enum values
+export type DbTournamentStatus = 
+  | 'draft' 
+  | 'registration_open' 
+  | 'registration_closed' 
+  | 'auction_scheduled' 
+  | 'auction_live' 
+  | 'auction_complete' 
+  | 'in_progress' 
+  | 'completed' 
+  | 'cancelled';
+
 export interface Ground {
   id: string;
   name: string;
@@ -252,9 +264,9 @@ export const mockStats: Stats = {
   totalTeams: 40
 };
 
-// Helper functions
-export const getCategoryLabel = (category: TournamentCategory): string => {
-  const labels: Record<TournamentCategory, string> = {
+// Helper functions - accept string to handle both mock and DB types
+export const getCategoryLabel = (category: TournamentCategory | string): string => {
+  const labels: Record<string, string> = {
     'open': 'Open',
     'corporate': 'Corporate',
     'school': 'School',
@@ -262,58 +274,87 @@ export const getCategoryLabel = (category: TournamentCategory): string => {
     'society': 'Society',
     'locality': 'Locality'
   };
-  return labels[category];
+  return labels[category] || category;
 };
 
-export const getBallTypeLabel = (ballType: BallType): string => {
-  const labels: Record<BallType, string> = {
+export const getBallTypeLabel = (ballType: BallType | string): string => {
+  const labels: Record<string, string> = {
     'tennis': 'Tennis Ball',
     'leather': 'Leather Ball',
     'tennis-tape': 'Tennis Tape Ball',
     'leather-white': 'White Leather'
   };
-  return labels[ballType];
+  return labels[ballType] || ballType;
 };
 
-export const getPitchTypeLabel = (pitchType: PitchType): string => {
-  const labels: Record<PitchType, string> = {
+export const getPitchTypeLabel = (pitchType: PitchType | string): string => {
+  const labels: Record<string, string> = {
     'turf': 'Turf',
     'cement': 'Cement',
     'matting': 'Matting',
     'synthetic': 'Synthetic',
     'grass': 'Grass'
   };
-  return labels[pitchType];
+  return labels[pitchType] || pitchType;
 };
 
-export const getMatchTypeLabel = (matchType: MatchType): string => {
-  const labels: Record<MatchType, string> = {
+export const getMatchTypeLabel = (matchType: MatchType | string): string => {
+  const labels: Record<string, string> = {
     'limited-overs': 'Limited Overs',
     't20': 'T20',
     't10': 'T10',
     'test': 'Test Match'
   };
-  return labels[matchType];
+  return labels[matchType] || matchType;
 };
 
-export const getStatusLabel = (status: TournamentStatus): string => {
-  const labels: Record<TournamentStatus, string> = {
+export const getStatusLabel = (status: TournamentStatus | DbTournamentStatus | string): string => {
+  const labels: Record<string, string> = {
     'draft': 'Draft',
     'registration': 'Registration Open',
+    'registration_open': 'Registration Open',
+    'registration_closed': 'Registration Closed',
     'auction': 'Auction Phase',
+    'auction_scheduled': 'Auction Scheduled',
+    'auction_live': 'Auction Live',
+    'auction_complete': 'Auction Complete',
     'live': 'Live',
-    'completed': 'Completed'
+    'in_progress': 'In Progress',
+    'completed': 'Completed',
+    'cancelled': 'Cancelled'
   };
-  return labels[status];
+  return labels[status] || status;
 };
 
-export const getStatusColor = (status: TournamentStatus): string => {
-  const colors: Record<TournamentStatus, string> = {
+export const getStatusColor = (status: TournamentStatus | DbTournamentStatus | string): string => {
+  const colors: Record<string, string> = {
     'draft': 'bg-muted text-muted-foreground',
     'registration': 'bg-success text-success-foreground',
+    'registration_open': 'bg-success text-success-foreground',
+    'registration_closed': 'bg-warning text-warning-foreground',
     'auction': 'bg-accent text-accent-foreground',
+    'auction_scheduled': 'bg-accent text-accent-foreground',
+    'auction_live': 'bg-live text-live-foreground',
+    'auction_complete': 'bg-secondary text-secondary-foreground',
     'live': 'bg-live text-live-foreground',
-    'completed': 'bg-secondary text-secondary-foreground'
+    'in_progress': 'bg-live text-live-foreground',
+    'completed': 'bg-secondary text-secondary-foreground',
+    'cancelled': 'bg-destructive text-destructive-foreground'
   };
-  return colors[status];
+  return colors[status] || 'bg-muted text-muted-foreground';
+};
+
+// Check if status is live-like (for UI effects)
+export const isLiveStatus = (status: string): boolean => {
+  return ['auction_live', 'in_progress', 'live', 'auction'].includes(status);
+};
+
+// Check if registration is open
+export const canApplyToTournament = (status: string): boolean => {
+  return ['registration', 'registration_open'].includes(status);
+};
+
+// Check if auction is happening
+export const isAuctionStatus = (status: string): boolean => {
+  return ['auction', 'auction_live'].includes(status);
 };
