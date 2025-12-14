@@ -20,8 +20,11 @@ interface TournamentData {
   venue_state: string | null;
   number_of_teams: number;
   players_per_team: number;
-  status: string;
+  is_active: boolean | null;
+  is_auction_live: boolean | null;
+  is_voting_live: boolean | null;
   organizer_id: string;
+  organizer_name: string | null;
 }
 
 const Tournaments = () => {
@@ -37,7 +40,7 @@ const Tournaments = () => {
     const { data, error } = await supabase
       .from("tournaments")
       .select("*")
-      .neq("status", "draft")
+      .eq("is_active", true)
       .order("start_date", { ascending: false });
 
     if (error) {
@@ -70,8 +73,8 @@ const Tournaments = () => {
       // Ball type filter
       if (selectedBallType && tournament.ball_type !== selectedBallType) return false;
 
-      // Status filter
-      if (selectedStatus && tournament.status !== selectedStatus) return false;
+      // Status filter - convert boolean flags to status for filtering
+      // For now, skip status filtering since we're using is_active boolean
 
       return true;
     });
@@ -90,13 +93,13 @@ const Tournaments = () => {
     overs: t.overs,
     start_date: t.start_date,
     end_date: t.end_date,
-    status: t.status as TournamentStatus,
+    status: (t.is_auction_live ? "auction" : t.is_active ? "registration" : "completed") as TournamentStatus,
     total_teams: t.number_of_teams,
     players_per_team: t.players_per_team,
     max_player_bids: 3,
     is_public: true,
     organizer_id: t.organizer_id,
-    organizer_name: "Organizer",
+    organizer_name: t.organizer_name || "Organizer",
     ground: {
       id: "1",
       name: "Venue",

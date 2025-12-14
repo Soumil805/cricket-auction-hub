@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { TournamentCard } from "@/components/tournaments/TournamentCard";
 import { supabase } from "@/integrations/supabase/client";
-import { Tournament, TournamentCategory, BallType, PitchType, MatchType, TournamentStatus } from "@/data/mockData";
+import { Tournament, TournamentCategory, BallType, PitchType, MatchType } from "@/data/mockData";
 import { ArrowRight, Loader2 } from "lucide-react";
 
 export function FeaturedTournaments() {
@@ -15,18 +15,21 @@ export function FeaturedTournaments() {
       const { data, error } = await supabase
         .from("tournaments")
         .select("*")
-        .neq("status", "draft")
-        .neq("status", "completed")
-        .neq("status", "cancelled")
+        .eq("is_active", true)
         .order("start_date", { ascending: true })
-        .limit(3);
+        .limit(6);
 
-      if (!error && data) {
-        // Transform DB data to match Tournament type
-        const transformed: Tournament[] = data.map((t) => ({
+      if (error) {
+        console.error("Error fetching tournaments:", error);
+        setLoading(false);
+        return;
+      }
+
+      if (data) {
+        const transformed: Tournament[] = data.map((t: any) => ({
           id: t.id,
           organizer_id: t.organizer_id,
-          organizer_name: "Tournament Organizer", // Would need a join to get this
+          organizer_name: t.organizer_name || "Tournament Organizer",
           name: t.name,
           slogan: t.slogan || undefined,
           logo_url: t.logo_url || undefined,
@@ -40,7 +43,7 @@ export function FeaturedTournaments() {
           total_teams: t.number_of_teams,
           players_per_team: t.players_per_team,
           max_player_bids: 3,
-          status: mapStatus(t.status),
+          status: "registration" as const,
           is_public: true,
           ground: {
             id: t.ground_id || "",
@@ -59,22 +62,6 @@ export function FeaturedTournaments() {
 
     fetchTournaments();
   }, []);
-
-  // Map database status to mock status type
-  const mapStatus = (dbStatus: string): TournamentStatus => {
-    const statusMap: Record<string, TournamentStatus> = {
-      "draft": "draft",
-      "registration_open": "registration",
-      "registration_closed": "registration",
-      "auction_scheduled": "auction",
-      "auction_live": "auction",
-      "auction_complete": "auction",
-      "in_progress": "live",
-      "completed": "completed",
-      "cancelled": "completed",
-    };
-    return statusMap[dbStatus] || "draft";
-  };
 
   return (
     <section className="py-16 md:py-24">

@@ -291,12 +291,17 @@ export type Database = {
           entry_fee: number | null
           ground_id: string | null
           id: string
+          is_active: boolean | null
+          is_auction_live: boolean | null
+          is_voting_live: boolean | null
           logo_url: string | null
           match_type: string
           max_votes_per_player: number | null
           name: string
           number_of_teams: number
           organizer_id: string
+          organizer_mobile: string | null
+          organizer_name: string | null
           overs: number
           payment_instructions: string | null
           payment_qr_url: string | null
@@ -304,7 +309,6 @@ export type Database = {
           players_per_team: number
           slogan: string | null
           start_date: string
-          status: Database["public"]["Enums"]["tournament_status"]
           team_budget: number
           updated_at: string
           venue_address: string | null
@@ -324,12 +328,17 @@ export type Database = {
           entry_fee?: number | null
           ground_id?: string | null
           id?: string
+          is_active?: boolean | null
+          is_auction_live?: boolean | null
+          is_voting_live?: boolean | null
           logo_url?: string | null
           match_type: string
           max_votes_per_player?: number | null
           name: string
           number_of_teams: number
           organizer_id: string
+          organizer_mobile?: string | null
+          organizer_name?: string | null
           overs: number
           payment_instructions?: string | null
           payment_qr_url?: string | null
@@ -337,7 +346,6 @@ export type Database = {
           players_per_team: number
           slogan?: string | null
           start_date: string
-          status?: Database["public"]["Enums"]["tournament_status"]
           team_budget: number
           updated_at?: string
           venue_address?: string | null
@@ -357,12 +365,17 @@ export type Database = {
           entry_fee?: number | null
           ground_id?: string | null
           id?: string
+          is_active?: boolean | null
+          is_auction_live?: boolean | null
+          is_voting_live?: boolean | null
           logo_url?: string | null
           match_type?: string
           max_votes_per_player?: number | null
           name?: string
           number_of_teams?: number
           organizer_id?: string
+          organizer_mobile?: string | null
+          organizer_name?: string | null
           overs?: number
           payment_instructions?: string | null
           payment_qr_url?: string | null
@@ -370,7 +383,6 @@ export type Database = {
           players_per_team?: number
           slogan?: string | null
           start_date?: string
-          status?: Database["public"]["Enums"]["tournament_status"]
           team_budget?: number
           updated_at?: string
           venue_address?: string | null
@@ -437,16 +449,6 @@ export type Database = {
       gender: "male" | "female" | "other"
       player_category: "a_plus" | "a" | "b" | "c"
       player_type: "batsman" | "bowler" | "all_rounder" | "wicket_keeper"
-      tournament_status:
-        | "draft"
-        | "registration_open"
-        | "registration_closed"
-        | "auction_scheduled"
-        | "auction_live"
-        | "auction_complete"
-        | "in_progress"
-        | "completed"
-        | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -588,17 +590,6 @@ export const Constants = {
       gender: ["male", "female", "other"],
       player_category: ["a_plus", "a", "b", "c"],
       player_type: ["batsman", "bowler", "all_rounder", "wicket_keeper"],
-      tournament_status: [
-        "draft",
-        "registration_open",
-        "registration_closed",
-        "auction_scheduled",
-        "auction_live",
-        "auction_complete",
-        "in_progress",
-        "completed",
-        "cancelled",
-      ],
     },
   },
 } as const
