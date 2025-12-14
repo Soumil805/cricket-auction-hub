@@ -109,9 +109,10 @@ const TournamentDetail = () => {
     );
   }
 
-  const isLive = isLiveStatus(tournament.status);
-  const canApply = canApplyToTournament(tournament.status);
-  const isAuction = isAuctionStatus(tournament.status);
+  // Use new boolean flags instead of status enum
+  const isLive = tournament.is_auction_live || tournament.is_voting_live;
+  const canApply = tournament.is_active && !tournament.is_auction_live;
+  const isAuction = tournament.is_auction_live;
 
   return (
     <Layout>
@@ -152,10 +153,10 @@ const TournamentDetail = () => {
             <div className="flex-1 space-y-4">
               <div className="flex flex-wrap items-center gap-3">
                 <Badge 
-                  className={`${getStatusColor(tournament.status)} ${isLive ? 'animate-pulse-live' : ''}`}
+                  className={`${tournament.is_active ? 'bg-success text-success-foreground' : 'bg-muted text-muted-foreground'} ${isLive ? 'animate-pulse-live' : ''}`}
                 >
                   {isLive && <Circle className="h-2 w-2 mr-1 fill-current" />}
-                  {getStatusLabel(tournament.status)}
+                  {tournament.is_auction_live ? 'Auction Live' : tournament.is_voting_live ? 'Voting Live' : tournament.is_active ? 'Active' : 'Inactive'}
                 </Badge>
                 <Badge variant="secondary" className="bg-primary-foreground/20 text-primary-foreground border-0">
                   {getCategoryLabel(tournament.category)}
@@ -324,15 +325,9 @@ const TournamentDetail = () => {
                     </Button>
                   )}
 
-                  {tournament.status === 'completed' && (
+                  {!tournament.is_active && (
                     <Button variant="outline" className="w-full" size="lg">
                       View Results
-                    </Button>
-                  )}
-
-                  {tournament.status === 'in_progress' && (
-                    <Button variant="outline" className="w-full" size="lg">
-                      View Matches
                     </Button>
                   )}
 
