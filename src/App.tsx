@@ -17,6 +17,7 @@ import BecomeOrganizer from "./pages/BecomeOrganizer";
 import LiveAuctions from "./pages/LiveAuctions";
 import LiveAuction from "./pages/LiveAuction";
 import NotFound from "./pages/NotFound";
+import About from "./pages/About";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/become-organizer" element={<BecomeOrganizer />} />
             <Route path="/auctions" element={<LiveAuctions />} />
             <Route path="/auctions/:id" element={<LiveAuction />} />
+            <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

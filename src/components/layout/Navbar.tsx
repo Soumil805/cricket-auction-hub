@@ -23,10 +23,9 @@ export function Navbar() {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 font-display font-bold text-xl">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Trophy className="h-5 w-5" />
-          </div>
-          <span className="hidden sm:inline-block">CricAuction</span>
+            <img src="../../../public/images/Cricket_Auction_Round_nobg.png" alt="Logo" className="h-10 w-10" />
+          
+          <span className="hidden sm:inline-block">Cricket Auction</span>
         </Link>
 
         {/* Desktop Navigation */}

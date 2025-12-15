@@ -9,10 +9,8 @@ export function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <Link to="/" className="flex items-center gap-2 font-display font-bold text-xl">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground">
-                <Trophy className="h-5 w-5" />
-              </div>
-              <span>CricAuction</span>
+              <img src="../../../public/images/Cricket_Auction_Round_nobg.png" alt="Logo" className="h-10 w-10" />        
+              <span>Cricket Auction</span>
             </Link>
             <p className="text-sm text-primary-foreground/80">
               The premier platform for organizing cricket tournaments and player auctions across India.
