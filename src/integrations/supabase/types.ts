@@ -310,6 +310,7 @@ export type Database = {
           slogan: string | null
           start_date: string
           team_budget: number
+          tournament_type: Database["public"]["Enums"]["tournament_type"]
           updated_at: string
           venue_address: string | null
           venue_city: string | null
@@ -347,6 +348,7 @@ export type Database = {
           slogan?: string | null
           start_date: string
           team_budget: number
+          tournament_type?: Database["public"]["Enums"]["tournament_type"]
           updated_at?: string
           venue_address?: string | null
           venue_city?: string | null
@@ -384,6 +386,7 @@ export type Database = {
           slogan?: string | null
           start_date?: string
           team_budget?: number
+          tournament_type?: Database["public"]["Enums"]["tournament_type"]
           updated_at?: string
           venue_address?: string | null
           venue_city?: string | null
@@ -449,6 +452,7 @@ export type Database = {
       gender: "male" | "female" | "other"
       player_category: "a_plus" | "a" | "b" | "c"
       player_type: "batsman" | "bowler" | "all_rounder" | "wicket_keeper"
+      tournament_type: "Normal" | "Auction" | "Auction with Voting"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -590,6 +594,7 @@ export const Constants = {
       gender: ["male", "female", "other"],
       player_category: ["a_plus", "a", "b", "c"],
       player_type: ["batsman", "bowler", "all_rounder", "wicket_keeper"],
+      tournament_type: ["Normal", "Auction", "Auction with Voting"],
     },
   },
 } as const
