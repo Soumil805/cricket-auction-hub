@@ -26,17 +26,26 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { TournamentActionMenu } from "./TournamentActionMenu";
 
 interface TournamentCardProps {
-  tournament: Tournament;
+  tournament: Tournament & {
+    captain_voting_enabled?: boolean;
+    is_voting_live?: boolean;
+    number_of_teams?: number;
+    tournament_type?: string;
+  };
   onDelete?: () => void;
+  teamsCount?: number;
 }
 
-export function TournamentCard({ tournament, onDelete }: TournamentCardProps) {
+export function TournamentCard({ tournament, onDelete, teamsCount = 0 }: TournamentCardProps) {
   const { user } = useAuth();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isVotingLive, setIsVotingLive] = useState(tournament.is_voting_live || false);
   const isLive = tournament.status === 'live' || tournament.status === 'auction';
   const isOwner = user && tournament.organizer_id === user.id;
+  const isCaptainVoting = tournament.captain_voting_enabled || tournament.tournament_type === 'Auction with Voting';
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -79,11 +88,26 @@ export function TournamentCard({ tournament, onDelete }: TournamentCardProps) {
         
         {/* Status Badge */}
         <Badge 
-          className={`absolute top-3 right-3 ${getStatusColor(tournament.status)} ${isLive ? 'animate-pulse-live' : ''}`}
+          className={`absolute top-3 left-3 ${getStatusColor(tournament.status)} ${isLive ? 'animate-pulse-live' : ''}`}
         >
           {isLive && <Circle className="h-2 w-2 mr-1 fill-current" />}
           {getStatusLabel(tournament.status)}
         </Badge>
+
+        {/* Three-dot Action Menu for Owner */}
+        {isOwner && (
+          <div className="absolute top-3 right-3 z-20">
+            <TournamentActionMenu
+              tournamentId={tournament.id}
+              tournamentName={tournament.name}
+              numTeams={tournament.number_of_teams || tournament.total_teams}
+              currentTeamsCount={teamsCount}
+              isCaptainVoting={isCaptainVoting}
+              isVotingLive={isVotingLive}
+              onVotingToggle={() => setIsVotingLive(!isVotingLive)}
+            />
+          </div>
+        )}
       </div>
 
       <CardContent className="p-4 space-y-3">

@@ -18,6 +18,10 @@ import LiveAuctions from "./pages/LiveAuctions";
 import LiveAuction from "./pages/LiveAuction";
 import NotFound from "./pages/NotFound";
 import About from "./pages/About";
+import CreateTeams from "./pages/CreateTeams";
+import ViewTeams from "./pages/ViewTeams";
+import CreateCaptains from "./pages/CreateCaptains";
+import ViewCaptainVotes from "./pages/ViewCaptainVotes";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +38,10 @@ const App = () => (
             <Route path="/tournaments/:id" element={<TournamentDetail />} />
             <Route path="/tournaments/:id/edit" element={<EditTournament />} />
             <Route path="/tournaments/new" element={<CreateTournament />} />
+            <Route path="/tournaments/:id/teams/create" element={<CreateTeams />} />
+            <Route path="/tournaments/:id/teams" element={<ViewTeams />} />
+            <Route path="/tournaments/:id/captains/create" element={<CreateCaptains />} />
+            <Route path="/tournaments/:id/captains/votes" element={<ViewCaptainVotes />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/register" element={<Register />} />
             <Route path="/register-umpire" element={<RegisterUmpire />} />

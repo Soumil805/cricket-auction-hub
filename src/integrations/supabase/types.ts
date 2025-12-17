@@ -56,6 +56,88 @@ export type Database = {
           },
         ]
       }
+      auction_config: {
+        Row: {
+          base_price: number
+          category: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          max_players: number
+          tournament_id: string
+          updated_at: string
+        }
+        Insert: {
+          base_price?: number
+          category: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_players?: number
+          tournament_id: string
+          updated_at?: string
+        }
+        Update: {
+          base_price?: number
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_players?: number
+          tournament_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auction_config_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      auction_timer: {
+        Row: {
+          bid_time: number
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          tournament_id: string
+          updated_at: string
+        }
+        Insert: {
+          bid_time?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          tournament_id: string
+          updated_at?: string
+        }
+        Update: {
+          bid_time?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          tournament_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auction_timer_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: true
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       grounds: {
         Row: {
           address: string | null
@@ -272,6 +354,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "tournament_applications_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournament_captain: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          mobile: string
+          name: string
+          photo_url: string | null
+          tournament_id: string
+          votes: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          mobile: string
+          name: string
+          photo_url?: string | null
+          tournament_id: string
+          votes?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          mobile?: string
+          name?: string
+          photo_url?: string | null
+          tournament_id?: string
+          votes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_captain_tournament_id_fkey"
             columns: ["tournament_id"]
             isOneToOne: false
             referencedRelation: "tournaments"
